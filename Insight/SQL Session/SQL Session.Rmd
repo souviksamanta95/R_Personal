@@ -1,0 +1,136 @@
+---
+title: "SQL Session"
+author: "Insight"
+date: "06/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(readxl)
+getwd()
+#install.packages("sqldf")
+library(sqldf)
+
+Orders <- read_excel("P1-SuperStoreUS-2015.xlsx", 
+    sheet = "Orders")
+
+
+Returns <- read_excel("P1-SuperStoreUS-2015.xlsx", 
+    sheet = "Returns")
+
+Users =read_excel("P1-SuperStoreUS-2015.xlsx", 
+    sheet = "Users")
+```
+
+
+
+
+# Practice
+1.)	Select different states or provinces  and their  corresponding country?
+
+```{r}
+
+sqldf("Select distinct State_or_Province, Country 
+      from Orders
+      where State_or_Province like 'A%m%'
+      order by State_or_Province  asc
+      ")
+```
+
+
+2.)	To get list of  product sub-category, Order ID 
+when customer segment is Small Business?
+
+
+```{r}
+df=sqldf("Select Product_Sub_Category, Order_ID , Customer_Segment
+      from Orders 
+      where Customer_Segment in ('Small Business','Corporate')
+      and Order_ID > 87000
+      order by Order_ID")
+write.csv(df,"data1.csv")
+df
+```
+
+3.)	To find the list of Order ID where order priority is critical ?
+
+
+```{r}
+sqldf("Select Order_ID from Orders where Order_Priority='Critical'")
+```
+
+4.)	To get Order ID where order priority is not low?
+
+```{r}
+sqldf("Select Order_ID from Orders where not Order_Priority='Low' ")
+```
+
+5.)	To get profit where customer segment is Consumer?
+
+```{r}
+sqldf("	Select Profit from Orders where Customer_Segment='Consumer' ")
+```
+
+6.)	To get Order Id, Customer segment and profit, sorted by “Profit”
+
+```{r}
+sqldf("Select Order_ID, Customer_Segment from Orders order by Profit")
+```
+
+7.)	To get the maximum profit value 
+
+```{r}
+sqldf("Select  Profit from Orders where 
+      Profit not in (Select  max(Profit) from Orders) order by Profit desc ")
+```
+
+
+8.)	To get the average profit
+
+```{r}
+sqldf("Select avg(Profit) from Orders")
+```
+
+9.)	To get Order Id, Product Name where status is “returned”
+
+```{r}
+sqldf("Select Orders.Order_ID, Orders.Product_Name 
+      from Orders 
+      inner join Returns 
+      on Orders.Order_ID= Returns.Order_ID")
+```
+
+10.)	To get customer id and their corresponding manager name
+
+```{r}
+sqldf("Select count (Orders.Customer_ID),Users.Manager 
+      from  Orders 
+      left join Users on Orders.Region=Users.Region
+      group by Users.Manager ")
+
+```
+
+
+```{r}
+sqldf("Select u.Manager as Manager_Name ,count(o.Customer_ID) as Count_of_Customers
+      from Users as u
+      left join Orders as o
+      on o.Region=u.Region
+      group by u.Manager ")
+```
+
+
+
+11.)	To get the list of number of customers from each Region
+
+
+```{r}
+sqldf("Select count(Customer_ID),  Region from Orders group by Region")
+
+```

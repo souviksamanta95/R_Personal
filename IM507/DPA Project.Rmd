@@ -1,0 +1,224 @@
+---
+title: "Group Project"
+author: "Group 11"
+date: "19/12/2019"
+output: word_document
+---
+# Importing the dataset-----------------------------------------------------------------------------------------------------------------------------------------------
+```{r}
+d1 <- read.csv("C:/Users/souvi/Documents/R/IM507/apy.csv")
+
+View(d1)
+head(d1)
+dim(d1)
+names(d1)
+summary(d1)
+str(d1)
+class(d1$Production)
+
+# Class of Production has been taken as factor which needs to be converted to double ---
+
+d1$Production <- as.double(d1$Production)
+str(d1)
+class(d1$Production)
+typeof(d1$Production)
+
+# Check for missing values ---
+
+sum(is.na(d1))
+
+# No missing values in the raw data. So, initially no need for treatment.
+```
+
+# Analysis of data ---------------------------------------------------------------------------------------------------------------------------------------------------
+## Finding out a year having record for all states---------------------------------
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Rearrenging data state wise and year wise ---
+
+d_year <- d1 %>% group_by(Crop_Year,State_Name)%>%
+  summarize(Total_Production = sum(Production))
+
+yrr <- spread(d_year, key = "State_Name", value = "Total_Production" )
+
+View(yrr)
+
+# yrr shows the missing records, also 2004 and 2005 has all records. So, let us subset all data of 2005 (say) to analyse crop-wise.
+```
+
+# Finding out highest produced crop for that year ---------------------------------
+## Subsetting 2005 ---------------------------------------------------------------------------------------------------------------------------------------------------
+```{r}
+y_2005 <- d1 %>% filter(Crop_Year==2005)
+
+# Finding out highest produced crop for 2005 ---
+
+y_2005_crop <- y_2005 %>% group_by(Crop = Crop) %>% 
+  summarize(Total = sum(Production)) %>% arrange(desc(Total))
+
+head(y_2005_crop)
+
+# Rice is the highest produced crop for 2005. So, let us analyse the data for Rice for all states and crop years.
+```
+# Find out state wise and year wise production of the highest produced crop -------
+## Subsetting data for Rice-------------------------------------------------------- -----------------------------------------------------------------------------------
+```{r}
+rice <- d1 %>% filter(Crop=="Rice")
+
+# Rearrenging data year and state wise ---
+
+rice_state <- rice %>% group_by(Crop_Year,State_Name)%>%
+  summarize(Total_Production = sum(Production))
+
+View(rice_state)
+
+yrr_rice <- spread(rice_state, key = "State_Name", value = "Total_Production" )
+
+dim(yrr_rice)
+```
+
+# Check for missing values -------------------------------------------------------- -----------------------------------------------------------------------------------
+```{r}
+sum(is.na(yrr_rice))
+
+# Year wise missing values - in the data we can see so many missing values in 2015, so we should remove record for 2015 which is the last row
+nrow(yrr_rice)
+
+yrr_rice <- yrr_rice[-19,]
+
+# State wise missing values ---
+sapply(yrr_rice, function(x)sum(is.na(x)))
+
+
+# There are records for 18 years where Andaman Nikobar and Jharkhand has more than 50% missing values
+```
+# Treating missing values --------------------------------------------------------- -----------------------------------------------------------------------------------
+```{r}
+# Removing columns for Andaman Nikobar and Jharkhand
+
+rice_new <- yrr_rice %>% select(-`Andaman and Nicobar Islands`,-Jharkhand)
+
+sum(is.na(rice_new))
+sapply(rice_new, function(x)sum(is.na(x)))
+
+# Filling missing values with mean 
+
+library(imputeTS)
+rice_new <- na_mean(rice_new)
+
+sum(is.na(rice_new))
+
+# Now, missing values have been treated 
+```
+
+# From the treated dataset, finding out top 5 rice producing states and graphically represent the variation of production with respect to years ----------------------- -----------------------------------------------------------------------------------
+```{r}
+# Restructuring the treated data (rice_new) for further analysis ---
+
+rice_str <- gather(rice_new, key = "State_Name", value = "Production",c(-Crop_Year))
+
+View(rice_str)
+
+# Plotting rice_new (Treated dataset) for further analysis ---
+
+# Total production of top 5 states in rice production throughout years ---
+
+rice_str %>% group_by(State = State_Name) %>%
+  summarize(Total = sum(Production)) %>% arrange(desc(Total))
+
+# Bihar, Uttar Pradesh, Assam, Odisha, Karnataka are the top 5 rice producers.
+
+```
+
+# Plotting data using ggplot2 ----------------------------------------------------- -----------------------------------------------------------------------------------
+```{r}
+library(ggplot2)
+
+# Year-wise rice production for Bihar - 
+rice_str %>% filter(State_Name=="Bihar") %>%
+  ggplot(aes(Crop_Year,Production))+
+  geom_bar(stat="identity", color="black", fill = "light blue") +
+  ggtitle("Year-wise rice production for Bihar") +
+  theme_classic()
+
+# Year-wise rice production for Uttar Pradesh - 
+rice_str %>% filter(State_Name=="Uttar Pradesh") %>%
+  ggplot(aes(Crop_Year,Production))+
+  geom_bar(stat="identity", color="black", fill = "light blue") +
+  ggtitle("Year-wise rice production for Uttar Pradesh") +
+  theme_classic()
+
+# Year-wise rice production for Assam - 
+rice_str %>% filter(State_Name=="Assam") %>%
+  ggplot(aes(Crop_Year,Production))+
+  geom_bar(stat="identity", color="black", fill = "light blue") +
+  ggtitle("Year-wise rice production for Assam") +
+  theme_classic()
+
+# Year-wise rice production for Odisha - 
+rice_str %>% filter(State_Name=="Odisha") %>%
+  ggplot(aes(Crop_Year,Production))+
+  geom_bar(stat="identity", color="black", fill = "light blue") +
+  ggtitle("Year-wise rice production for Odisha") +
+  theme_classic()
+
+# Year-wise rice production for Karnataka - 
+rice_str %>% filter(State_Name=="Karnataka") %>%
+  ggplot(aes(Crop_Year,Production))+
+  geom_bar(stat="identity", color="black", fill = "light blue") +
+  ggtitle("Year-wise rice production for Karnataka") +
+  theme_classic()
+```
+
+# Finding out top 5 highest produced crops for 2005 and graphically finding its relation to season ----------------------------------------------------------------
+
+```{r}
+# IN 2005 most produced crops are - 
+head(y_2005_crop)
+
+# Top 5 produced crops are - Rice, Maize, Moong(Green Gram), Sesamum, Urad
+
+# Also, yrr_rice shows that 2004, 2005 has data for all the states. So let us plot for 2004 and 2005
+```
+# Finding relation between produced crop with respect to season ------------------- -----------------------------------------------------------------------------------
+```{r}
+
+# Production of Rice -
+d1 %>% filter(Crop_Year==c(2004,2005),Crop=="Rice") %>%
+  ggplot(aes(Production))+
+  geom_histogram(color="black",aes(fill=Season)) + theme_classic()+
+  facet_grid(Crop_Year~., scales = "free")+
+  ggtitle("Production of Rice with respect to Season")
+
+# Production of Maize -
+d1 %>% filter(Crop_Year==c(2004,2005),Crop=="Maize") %>%
+  ggplot(aes(Production))+
+  geom_histogram(color="black",aes(fill=Season)) + theme_classic()+
+  facet_grid(Crop_Year~., scales = "free")+
+  ggtitle("Production of Maize with respect to Season")
+
+# Production of Moong(Green Gram) -
+d1 %>% filter(Crop_Year==c(2004,2005),Crop=="Moong(Green Gram)") %>%
+  ggplot(aes(Production))+
+  geom_histogram(color="black",aes(fill=Season)) + theme_classic()+
+  facet_grid(Crop_Year~., scales = "free")+
+  ggtitle("Production of Moong(Green Gram) with respect to Season")
+
+# Production of Sesamum -
+d1 %>% filter(Crop_Year==c(2004,2005),Crop=="Sesamum") %>%
+  ggplot(aes(Production))+
+  geom_histogram(color="black",aes(fill=Season)) + theme_classic()+
+  facet_grid(Crop_Year~., scales = "free")+
+  ggtitle("Production of Sesamum with respect to Season")
+
+# Production of Urad -
+d1 %>% filter(Crop_Year==c(2004,2005),Crop=="Urad") %>%
+  ggplot(aes(Production))+
+  geom_histogram(color="black",aes(fill=Season)) + theme_classic()+
+  facet_grid(Crop_Year~., scales = "free")+
+  ggtitle("Production of Urad with respect to Season")
+```
+
+

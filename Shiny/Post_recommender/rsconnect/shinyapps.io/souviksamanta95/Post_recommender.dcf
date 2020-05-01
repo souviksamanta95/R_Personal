@@ -1,0 +1,12 @@
+name: Post_recommender
+title: Post_recommender
+username:
+account: souviksamanta95
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2034822
+bundleId: 2953689
+url: https://souviksamanta95.shinyapps.io/Post_recommender/
+when: 1585745421.23398
+asMultiple: FALSE
+asStatic: FALSE

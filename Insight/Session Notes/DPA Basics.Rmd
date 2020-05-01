@@ -1,0 +1,205 @@
+---
+title: "DPA"
+author: "Insight"
+date: "16/12/2019"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+ + What is R markdown
+ + How to make R markdown
+ + R Markdown Cheatsheet 
+    + https://rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf
+    
+ 
+
+## Installing all libraries in one command
+
+
+  + install.packages(c("dplyr", "sqldf","ggplot2",arules", "car", "caTools", "data.table", "forecast", "glmnet", "party", "partykit", "rattle", "Rcpp", "RGtk2", "rpart.plot"))
+  
+  + http://bit.ly/insightdpa
+
+
+
+## Dataframes
+
+```{r echo=TRUE,message=FALSE}
+## creating a data frame
+
+empid<- c(21,23,31,62,02); #empid
+empname<- as.character(c("A","B","C","D","E"));#empname
+desig<- as.factor(c("RM","SMM","ASM","RM","SM"));#desig
+design<-factor(desig,levels=c("ASM","RM","SMM"), ordered=TRUE)
+
+db<-as.Date.factor(c("1999-02-02","1998-02-02","1997-02-02","1996-02-02","1995-02-02"))
+#db
+salary<- c(20000,23000,25000,240000,25000);#salary
+region<-as.factor(c("N","S","S","E","W"));#region
+
+employee<- data.frame(empid,empname,desig,db,salary,region,stringsAsFactors = F);employee
+```
+
+## Functions used to describe dataframes
+```{r echo=TRUE}
+str(employee)
+
+dim(employee)
+
+ncol(employee)
+
+nrow(employee)
+
+summary(employee)
+
+names(employee)
+
+class(employee)
+
+mean(employee$salary) # to find the mean length
+```
+
+## Basic graphical analysis
+```{r echo=T}
+library(ggplot2)
+ggplot(employee,aes(salary))+geom_histogram()
+```
+
+## DPLYR vs SQLDF
+
+  + Both libraries help in filtering of data
+  + SQLDF is for programmers with an experience of SQL
+  + DPLYR is made for R
+
+## Practice with Filtering of Data
+```{r, echo=TRUE}
+data=read.csv("auto-mpg.csv")
+library(dplyr)
+#1 # to find cars whose miles per gallon > median mpg
+data %>%  select(car.name,mpg) %>% filter(mpg, mpg > 23.00) 
+```
+
+## 2 Finding mean mpg for each cylinder
+```{r, echo=TRUE}
+data %>% 
+  group_by(cylinders) %>%
+  summarise(mean_mpg = mean(mpg, na.rm = TRUE))  
+```
+
+## 3 calculate mean, min, max and sd of mpg and wt rates by number of cyl 
+```{r, echo=TRUE}
+data %>%
+  group_by(cylinders) %>%
+  summarise_each(funs(mean(., na.rm = TRUE), 
+                      min(., na.rm = TRUE), 
+                      max(., na.rm = TRUE), 
+                      sd(., na.rm = TRUE)), 
+                 mpg, weight)
+```
+
+## 4 calculate mean mpg and weight by number of cylinders 
+sumarise_each - applies the same function to multiple columns 
+```{r, echo=TRUE}
+data %>%
+  group_by(cylinders) %>%
+  summarise_each(funs(mean(., na.rm = TRUE)), mpg, weight)
+```
+
+## 5 count number of cars with each number of cylinders and put in descending order 
+```{r, echo=TRUE}
+data %>%
+  group_by(cylinders) %>%
+  summarise(cyl_count=n()) %>%
+  arrange(desc(cyl_count))
+```
+
+
+## GGPlot Practice
+```{r echo=TRUE}
+irisdata=read.csv("IRIS.csv")
+(Sepal_data <- ggplot(data=irisdata, aes(x = sepal_length, y = sepal_width)) + geom_point(aes(color=species, shape=species)) +
+  xlab("Sepal Length") +  ylab("Sepal Width") +
+  ggtitle("Sepal Length-Width"))
+
+(Petal_Data= ggplot(data=irisdata, aes(x = petal_length, y = petal_width)) + geom_point(aes(color=species, shape=species)) +
+  xlab("Petal Length") +  ylab("Petal Width") +
+  ggtitle("Petal Length-Width"))
+
+(box=ggplot(irisdata,aes(petal_length,sepal_length))+geom_smooth()+geom_boxplot()+facet_grid(~species)+
+  ggtitle("Boxplots of petal length vs sepal length"))
+
+
+(speciesvsSLength=ggplot(irisdata,aes(species,sepal_length))+geom_point()+geom_jitter() +
+  ggtitle("Species wise Sepal Length"))
+
+ggplot(irisdata,aes(species,sepal_width))+geom_point()+geom_jitter()+
+  ggtitle("Species wise Sepal Width")
+
+
+ggplot(irisdata,aes(species,petal_length))+geom_point()+geom_jitter()+
+  ggtitle("Species wise Petal Length")
+
+ggplot(irisdata,aes(species,petal_width))+geom_point()+geom_jitter()+
+  ggtitle("Species wise Petal Width")
+
+
+```
+
+## QQ plot
+
+```{r echo=TRUE}
+library (tseries)
+
+jarque.bera.test(data$mpg) 
+
+qqnorm(data$mpg, pch = 1, frame = FALSE)
+qqline(data$mpg, col = "steelblue", lwd = 2)
+
+
+```
+
+
+## Linear Regression - Reading Data
+```{r echo=TRUE}
+library(readxl)
+myData <- read_excel("petrol diesel data.xls")
+df<- myData
+#View(df)
+names(df)
+```
+
+## Linear Regression - Renaming columns
+```{r echo=TRUE}
+colnames(df)[colnames(df)=="Petrol (MT)"]<-"petrol" 			    # Renaming the columns	
+colnames(df)[colnames(df)=="HSD (MT)"]<-"diesel"			    # Renaming the columns	
+colnames(df)[colnames(df)=="GDP 99-00 price (Rs. million)"]   <-"gdp"	        # Renaming the columns
+colnames(df)[colnames(df)=="Real Pr HSD (Rs/Lit)"]<-"realDies"	      # Renaming the columns
+colnames(df)[colnames(df)=="Real Pr Petrol (Rs/Lit)"]<-"realPet"	      # Renaming the columns
+
+names(df)
+head(df)
+```
+
+## Linear regression - selecting useful columns only
+```{r echo=TRUE}
+df <-df[c(2,3,4,5,6)] 						                    # Select the column by index, 
+head(df)
+```
+
+## Linear Regression - understanding
+```{r echo=TRUE}
+options (scipen=99999)
+##Regression
+reg<-lm(petrol~gdp+realPet+realDies, data=df)        #Petrol
+summary(reg)
+```
+
+```{r}
+reg<-lm(petrol~gdp+log(realPet), data=df)        #Petrol
+summary(reg)
+```

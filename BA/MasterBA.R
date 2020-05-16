@@ -1,6 +1,6 @@
 
 # Package install - 
-install.packages(c("dplyr","tidyr","tidyverse","readr","readxl","RCurl","Amelia","Hmisc","stringr","lubridate","ggplot2","imputeTS","VIM","class","e1071","scales","corpcor","GPArotation","psych","REdaS","Factoshiny","arules","arulesViz","rpart","rpart.plot","party","randomForest","caret"))
+install.packages(c("dplyr","tidyr","tidyverse","readr","readxl","RCurl","Amelia","Hmisc","stringr","lubridate","ggplot2","imputeTS","caTools","VIM","class","e1071","scales","corpcor","GPArotation","psych","REdaS","Factoshiny","arules","arulesViz","rpart","rpart.plot","party","randomForest","caret"))
 
 # Activating generic libraries with suitable purpose -
 
@@ -16,6 +16,7 @@ library(stringr)        # String manipulation
 library(lubridate)      # Handling date and time
 library(ggplot2)        # Graphs
 library(imputeTS)       # Imputing miltiple values
+library(caTools)        # Stplitting train and test
 
 # Activating algoruthm specific libraries with suitable purpose -
 
@@ -23,12 +24,15 @@ library(VIM)            # kNN algorithm mod2
 library(class)          # kNN algorithm mod3
 library(e1071)          # Naive Bayes algorithm
 library(scales)         # Getting percentages
+library(zoo)
 
 library(corpcor)        # PCA
 library(GPArotation)    # PCA
 library(psych)          # PCA
 library(REdaS)          # PCA
 library(Factoshiny)     # PCA
+library(mvtnorm)
+library(foreach)
 
 library(arules)         # Apriori
 library(arulesViz)      # Apriori

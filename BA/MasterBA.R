@@ -2,6 +2,33 @@
 # Package install - 
 install.packages(c("dplyr","tidyr","tidyverse","readr","readxl","RCurl","Amelia","Hmisc","stringr","lubridate","ggplot2","imputeTS","caTools","VIM","class","e1071","scales","corpcor","GPArotation","psych","REdaS","Factoshiny","arules","arulesViz","rpart","rpart.plot","party","randomForest","caret"))
 
+install.packages("zoo")
+install.packages("corpcor")
+install.packages("e1071")
+install.packages("VIM")
+install.packages("imputeTS")
+install.packages("RCurl")
+install.packages("Amelia")
+install.packages("Hmisc")
+install.packages("tidyverse")
+install.packages("tidyr")
+install.packages("dplyr")
+install.packages("GPArotation")
+install.packages("psych")
+install.packages("REdaS")
+install.packages("Factoshiny")
+install.packages("Factoshiny")
+install.packages("mvtnorm")
+install.packages("foreach")
+install.packages("arules")
+install.packages("arulesViz")
+install.packages("rpart.plot")
+install.packages("party")
+install.packages("randomForest")
+install.packages("caret")
+
+
+
 # Activating generic libraries with suitable purpose -
 
 library(dplyr)          # Data manipulation and wrangling

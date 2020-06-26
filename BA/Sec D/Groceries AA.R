@@ -1,0 +1,12 @@
+library("arules")
+install.packages("arulesViz")
+library("arulesViz")
+data("Groceries")
+str(Groceries)
+length(Groceries)
+size(Groceries)
+inspect(Groceries[1:10])
+itemFrequencyPlot(Groceries,topN=20,type="absolute")
+
+rules<-apriori(Groceries,parameter=list(support=0.001,confidence=0.6,target="rules"))
+inspect(head(sort(rules,by="lift"),15))

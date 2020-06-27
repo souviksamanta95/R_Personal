@@ -23,10 +23,16 @@ install.packages("foreach")
 install.packages("arules")
 install.packages("arulesViz")
 install.packages("rpart.plot")
+install.packages("rattle")
 install.packages("party")
 install.packages("randomForest")
 install.packages("caret")
-
+install.packages("factoextra")
+install.packages("ggsignif", type="win.binary") 
+install.packages("ggpubr", type="win.binary")
+install.packages("FNN")
+install.packages("gains")
+install.packages("InformationValue")
 
 
 # Activating generic libraries with suitable purpose -
@@ -49,7 +55,9 @@ library(caTools)        # Stplitting train and test
 
 library(VIM)            # kNN algorithm mod2
 library(class)          # kNN algorithm mod3
+library(FNN)            # kNN Prerna Mam
 library(e1071)          # Naive Bayes algorithm
+library(gains)          # Naive bayes gains
 library(scales)         # Getting percentages
 library(zoo)
 
@@ -65,12 +73,15 @@ library(arules)         # Apriori
 library(arulesViz)      # Apriori
 
 library(rpart)          # Decision tree and Random forest
+library(rattle)         # Decision tree
 library(rpart.plot)     # Decision tree and Random forest
 library(party)          # Decision tree and Random forest
 library(randomForest)   # Decision tree and Random forest
 library(caret)          # Decision tree and Random forest
 
-
+library(factoextra)     # Cluster analysis
+library(ggpubr)          # cluster plotting
+library(InformationValue) # Confusion matrix, cut-off values
 
 
 

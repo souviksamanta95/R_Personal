@@ -1,4 +1,4 @@
-#### Table 8.4
+#### Naive Bayes
 
 library(e1071)
 delays.df <- read.csv("FlightDelays.csv")

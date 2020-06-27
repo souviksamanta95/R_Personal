@@ -1,9 +1,7 @@
-install.packages("rpart")
 library(rpart)
-install.packages("rpart.plot")
 library(rpart.plot)
 
-bank.df<-read.csv(file.choose(), header= T)
+bank.df<-read.csv("UniversalBank.csv", header= T)
 str(bank.df)
 bank.df <- bank.df[ , -c(1, 5)]  # Drop ID and zip code columns.
 
@@ -20,15 +18,10 @@ length(default.ct$frame$var[default.ct$frame$var == "<leaf>"])
 # plot tree
 prp(default.ct, type = 1, extra = 1, under = TRUE, split.font = 1, varlen = -10)
 
-
-install.packages("rattle")
 library(rattle)	
 fancyRpartPlot(default.ct)
-
-
 # predict
 predict(default.ct,valid.df)
-
 
 # set argument type = "class" in predict() to generate predicted class membership.
 
@@ -42,11 +35,10 @@ confusionMatrix(default.ct.point.pred.train, as.factor(train.df$Personal.Loan))
 default.ct.point.pred.valid <- predict(default.ct,valid.df,type = "class")
 confusionMatrix(default.ct.point.pred.valid, as.factor(valid.df$Personal.Loan))
 
-
-
 ### Tree Pruning
 
-deeper.ct <- rpart(Personal.Loan ~ ., data = train.df, method = "class", cp = 0, minsplit = 1)
+deeper.ct <- rpart(Personal.Loan ~ ., data = train.df, method = "class",
+                   cp = 0, minsplit = 1)
 # count number of leaves
 length(deeper.ct$frame$var[deeper.ct$frame$var == "<leaf>"])
 # plot tree
@@ -67,6 +59,4 @@ pruned.ct <- prune(cv.ct,cp = 0.0169697)
 length(pruned.ct$frame$var[pruned.ct$frame$var == "<leaf>"])
 prp(pruned.ct, type = 1, extra = 1, split.font = 1, varlen = -10)  
 
-#
 fancyRpartPlot(pruned.ct)
-

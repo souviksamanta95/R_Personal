@@ -1,6 +1,6 @@
-## prob 3
-#car.df <- read.csv("ToyotaCorolla.csv")
-car.df<-read.csv(file.choose(), header= T)
+# CART regression
+car.df <- read.csv("ToyotaCorolla.csv")
+#car.df<-read.csv(file.choose(), header= T)
 str(car.df)
 
 # preprocess
@@ -22,11 +22,8 @@ prp(tr)
 # errors
 library(forecast)
 library(ggplot2)
-
 accuracy(predict(tr, train.df), train.df$Price)
 accuracy(predict(tr, valid.df), valid.df$Price)
-
-
 
 # shallower tree
 tr.shallow <- rpart(Price ~  Age_08_04 + KM + Fuel_Type + 
@@ -38,7 +35,6 @@ tr.shallow <- rpart(Price ~  Age_08_04 + KM + Fuel_Type +
 prp(tr.shallow)
 accuracy(predict(tr.shallow, train.df), train.df$Price)
 accuracy(predict(tr.shallow, valid.df), valid.df$Price)
-
 
 ############################################
 #Classification Tree
@@ -58,7 +54,6 @@ tr.binned <- rpart(Binned_Price ~  Age_08_04 + KM + Fuel_Type +
                      Mfr_Guarantee + Guarantee_Period + Airco + 
                      Automatic_airco + CD_Player + Powered_Windows + 
                      Sport_Model + Tow_Bar, data = train.df)
-
 prp(tr.binned)
 
 # predict price
@@ -77,7 +72,6 @@ new.record <- data.frame(Age_08_04 = 77,
                          Powered_Windows = 0, 
                          Sport_Model = 0, 
                          Tow_Bar = 1)
-
 # regression model 
 price.tr <- predict(tr, newdata = new.record)
 

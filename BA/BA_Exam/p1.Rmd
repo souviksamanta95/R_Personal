@@ -1,0 +1,27 @@
+
+```{r}
+# Setting working directory
+setwd("C:/BA")
+
+# Reading the data from csv file
+data1 <- read.csv("Western_Music_Lover.csv", header = T)
+head(data1)
+
+# Normalizing the data
+data1.norm <- sapply(data1[,-1], scale)
+head(data1.norm)
+```
+
+
+```{r pressure, echo=FALSE}
+# Applying k-means clustering for 3 clusters
+library(caret)
+km <- kmeans(data1.norm, 3)
+km
+table(km$cluster)
+
+library(factoextra)
+library(ggpubr)
+fviz_cluster(km, data = data1.norm)
+```
+

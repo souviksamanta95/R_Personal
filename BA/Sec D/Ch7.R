@@ -17,7 +17,7 @@ text(60, 20, "X")
 legend("topright", c("owner", "non-owner", "newhousehold"), pch = c(1, 3, 4))
 
 
-
+library(caret)
 #### Table 7.2
 
 # initialize normalized training, validation data, complete data frames to originals

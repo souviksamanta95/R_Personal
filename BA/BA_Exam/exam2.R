@@ -24,10 +24,20 @@ data2.norm[, 1:8] <- predict(norm.values, data2[, 1:8])
 
 # Using KNN
 library(FNN)
-accuracy <- data.frame(k = seq(1,20,1), Accuracy = rep(0, 20))
-for (i in 1:20){
+accuracy <- data.frame(k = seq(1,100,1), Accuracy = rep(0, 100))
+for (i in 1:100){
  nn <- knn(train = train.norm.df[, 1:8], test = valid.norm.df[, 1:8],
           cl = train.norm.df[, 9], k = i)
  accuracy[i, 2] <- sum(nn==valid.norm.df$Outcome)/length(valid.norm.df$Outcome)
 }
-accuracy
+plot(accuracy)
+
+acc <- accuracy$Accuracy
+
+
+plot(acc, type = "b" , col = "light green",cex = 1, pch = 20,
+     xlab = "k(Number Of Neighbours)",ylab = "Classification accuracy( in %)",
+     main = "Accuracy vs Number of Neighbours")
+abline(v=which(acc==max(acc)), col = "red", lwd = 1.5)
+abline(h=max(acc), col = "light blue", lty = 3)
+abline(h=min(acc), col = "light blue", lty = 3)

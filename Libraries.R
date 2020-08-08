@@ -16,7 +16,7 @@ install.packages("GPArotation")
 install.packages("psych")
 install.packages("REdaS")
 install.packages("Factoshiny")
-install.packages("Factoshiny")
+install.packages("Rcpp")
 install.packages("mvtnorm")
 install.packages("foreach")
 install.packages("arules")
@@ -32,7 +32,30 @@ install.packages("ggpubr", type="win.binary")
 install.packages("FNN")
 install.packages("gains")
 install.packages("InformationValue")
+install.packages("raster")
 install.packages("usdm")
+install.packages("regclass")
+install.packages("tm")
+install.packages("NLP")
+install.packages("textstem")
+install.packages("SnowballC")
+install.packages("reshape2")
+install.packages("tidytext")
+install.packages("tseries")
+install.packages("fBasics")
+install.packages("proxy")
+install.packages("igraph")
+install.packages("ggraph")
+install.packages("tidytext")
+install.packages("wordcloud")
+install.packages("forecast")
+install.packages("plm")
+install.packages("Formula")
+install.packages("tcltk")
+install.packages("uroot")
+install.packages("pdR")
+install.packages("stats")
+
 
 
 # Activating generic libraries with suitable purpose -
@@ -51,7 +74,8 @@ library(ggplot2)        # Graphs
 library(imputeTS)       # Imputing miltiple values
 library(caTools)        # Stplitting train and test
 
-# Activating algoruthm specific libraries with suitable purpose -
+
+# Activating algorithm specific libraries with suitable purpose -
 
 library(VIM)            # kNN algorithm mod2
 library(class)          # kNN algorithm mod3
@@ -82,7 +106,56 @@ library(caret)          # Decision tree and Random forest
 library(factoextra)     # Cluster analysis
 library(ggpubr)         # cluster plotting
 library(InformationValue) # Confusion matrix, cut-off values
-library(usdm)           # Time series
+
+
+# -------------------- END OF BUSINESS ANALYTICS -------------------------
+
+
+# Libraries used in PRA
+
+library(raster)         # Support for usdm
+library(usdm)           # vif for multicolinearity
+library(regclass)       # VIF for models
+library(tseries)        # Time series
+library(forecast)       # ARIMA
+library(plm)            # 
+library(Formula)        # 
+library(tcltk)          # 
+library(uroot)          # 
+library(pdR)            # 
+library(stats)          # 
+
+# Libraries used in TA
+
+library(rvest)          # Handling html
+library(dplyr)          # Data wrangling
+library(stringr)        # String operations
+library(tm)             # Text mining
+library(NLP)            # Natural language Processing
+library(textstem)       # Stemming
+library(SnowballC)      # Stemming/lemmatization
+library(reshape2)       # Shaping texts
+library(tidytext)       # Text operations
+library(proxy)          # TF-IDF
+library(igraph)         # 
+library(ggraph)         # 
+library(tidytext)       # 
+library(wordcloud)      # Wordcloud
+
+
+# Libraries used in FMA
+
+library(tseries)        # Time series - ADF Test
+library(fBasics)        # Statistical tests
+library(forecast)       # Auto-ARIMA
+
+
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,118 @@
+---
+title: "ARIMA"
+author: "Souvik"
+date: "28/07/2020"
+output: html_document
+---
+
+## ARIMA
+
+Here you can take your notes for reference regarding class
+
+### Time Series ARIMA and MSARIMA Models in R: Box Jenkin's Methodology
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_knit$set(root.dir ="D:/Analytics/R/PRA/Datasets")
+```
+
+
+```{r, echo=FALSE}
+rm(list=ls())
+cat("\014")
+library(tseries)
+library(forecast)
+library(plm)
+library(Formula)
+library(tcltk)
+library(uroot)
+library(pdR)
+library(stats)
+options (scipen=99999)
+```
+
+```{r}
+df<-read.csv("US-Electricity-Sales.csv", header=TRUE)
+nrow(df)
+ncol(df)
+head(df)
+```
+
+```{r}
+tsdisplay(df$Sales, lag=50)   #Graph, ACF, PACF
+
+#adf.test(diff(df$Sales,1), alternative="stationary", k=6)  
+adf.test(diff(df$Sales,12), alternative="stationary", k=12)  
+
+##Identification: SEASONAL: Seasonal Differencing
+tsdisplay(diff(diff(df$Sales,12),1), lag=50)   #Graph, ACF, PACF
+```
+
+# Plots: Graphs, ACF and PACF -------
+## Identification: TREND: Level
+```{r}
+tsdisplay(df$Sales, lag=50)   #Graph, ACF, PACF
+
+#adf.test(diff(df$Sales,1), alternative="stationary", k=6)  
+adf.test(diff(df$Sales,12), alternative="stationary", k=12)  
+
+##Identification: SEASONAL: Seasonal Differencing
+tsdisplay(diff(diff(df$Sales,12),1), lag=50)   #Graph, ACF, PACF
+
+```
+
+## Estimation and Diagnostics
+```{r}
+fit1 <- Arima(df$Sales, order=c(1,0,0), seasonal = list(order = c(2, 1, 3), period=12))
+fit1
+summary(fit1)
+
+tsdisplay(residuals(fit1))
+Box.test(residuals(fit1), lag=15, fitdf=6, type="Ljung")
+Box.test(residuals(fit1), lag=10, fitdf=6, type="Ljung")
+Box.test(residuals(fit1), lag=20, fitdf=6, type="Ljung")
+b2<-tsdiag(fit1)
+```
+```{r}
+fit1 <- Arima(df$Sales, order=c(1,0,1), seasonal = list(order = c(2, 1, 3), period=12))
+fit1
+summary(fit1)
+
+tsdisplay(residuals(fit1))
+Box.test(residuals(fit1), lag=5, fitdf=3, type="Ljung")
+Box.test(residuals(fit1), lag=10, fitdf=3, type="Ljung")
+Box.test(residuals(fit1), lag=20, fitdf=3, type="Ljung")
+b2<-tsdiag(fit1)
+```
+```{r}
+fit1 <- Arima(df$Sales, order=c(1,0,2), seasonal = list(order = c(1, 1, 2), period=12))
+fit1
+summary(fit1)
+
+tsdisplay(residuals(fit1))
+Box.test(residuals(fit1), lag=5, fitdf=3, type="Ljung")
+Box.test(residuals(fit1), lag=10, fitdf=3, type="Ljung")
+Box.test(residuals(fit1), lag=20, fitdf=3, type="Ljung")
+b2<-tsdiag(fit1)
+```
+```{r}
+fit1 <- Arima(df$Sales, order=c(1,0,2), seasonal = list(order = c(1, 1, 1), period=12))
+fit1
+summary(fit1)
+
+tsdisplay(residuals(fit1))
+Box.test(residuals(fit1), lag=5, fitdf=3, type="Ljung")
+Box.test(residuals(fit1), lag=10, fitdf=3, type="Ljung")
+Box.test(residuals(fit1), lag=20, fitdf=3, type="Ljung")
+b2<-tsdiag(fit1)
+```
+```{r}
+fit1 <- Arima(df$Sales, order=c(1,0,2), seasonal = list(order = c(0, 1, 1), period=12))
+fit1
+summary(fit1)
+
+tsdisplay(residuals(fit1))
+Box.test(residuals(fit1), lag=5, fitdf=3, type="Ljung")
+Box.test(residuals(fit1), lag=10, fitdf=3, type="Ljung")
+Box.test(residuals(fit1), lag=20, fitdf=3, type="Ljung")
+b2<-tsdiag(fit1)
+```

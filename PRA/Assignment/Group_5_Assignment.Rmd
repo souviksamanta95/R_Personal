@@ -1,3 +1,14 @@
+---
+title: "PRA Group Assignment"
+author: "Group - 5"
+date: "06/08/2020"
+output: powerpoint_presentation
+#output: slidy_presentation
+---
+
+
+## Loading libraries and data
+```{r cars, echo = FALSE}
 rm(list=ls())
 library(forecast)
 library(graphics)
@@ -10,9 +21,12 @@ library(tcltk)
 library(uroot)
 library(pdR)
 options (scipen=99999)
-setwd("D:/Analytics/R/PRA/datasets")
+setwd("D:/Analytics/R/PRA/Datasets")
 df=read.csv("png.csv",header = T)
+```
 
+## ARIMA modelling
+```{r}
 str(df)
 sum(is.na(df))
 nrow(df)
@@ -50,11 +64,13 @@ Box.test(residuals(fit1), lag=5, fitdf=3, type="Ljung")
 b2<-tsdiag(fit1)
 b2
 
-tsdisplay(res)
 Box.test(residuals(fit2), lag=10, fitdf=6, type="Ljung")
 b2<-tsdiag(fit2)
 b2
+```
 
+## Exponential Smoothing
+```{r}
 # Exponential smoothing
 ##Fit simple exponential smoothing model 
 rel_ses <- ses(df$Close)
@@ -81,7 +97,8 @@ rel_hw <- HoltWinters(y, seasonal = "mult")
 rel_hw
 pred <- predict(rel_hw, 50, prediction.interval = TRUE)
 plot(rel_hw, pred)
-
+```
+```{r}
 
 # OUT OF SAMPLE Forecast
 # For ARIMA
@@ -118,3 +135,4 @@ plot(fit1_fcast_no_holdout, main=" ")
 lines(ts(df$Close))
 summary(fit1_fcast_no_holdout)
 
+```

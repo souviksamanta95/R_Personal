@@ -1,7 +1,7 @@
 # Session 2 - 7 July 2020 - 10:15 am
 
 ##Import the data
-##Adjust Outliers
+
 ##Check for class bias
 ##Create training and test samples
 ##Compute information value to find out important variables

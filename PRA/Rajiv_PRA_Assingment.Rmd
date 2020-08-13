@@ -1,0 +1,245 @@
+---
+title: "Presentation"
+author: "Insight"
+date: "06/08/2020"
+output:
+  ioslides_presentation: default
+  powerpoint_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Slide with R Output
+
+```{r , echo = TRUE}
+library(tseries)
+library(forecast)
+library(plm)
+library(Formula)
+library(tcltk)
+library(uroot)
+library(pdR)
+library(stats)
+options (scipen=99999)
+```
+
+```{r , echo = TRUE}
+library(readxl)
+PRA_Assingnment <- read_excel("PRA_Assingnment.xlsx")
+df<-PRA_Assingnment
+nrow(df)
+ncol(df)
+head(df)
+hold <- window(ts(df$Sales), start=40)
+df<- df[c(1:40),]
+
+```
+
+```{r , echo = TRUE}
+# Checking the plot of the data
+tsdisplay(df$Sales, lag=50) 
+
+
+k = trunc(length(df$Sales)-1)^(1/3)  #k= number of lags
+k
+
+#Checking for Trend Non-stationarity
+adf.test(df$Sales, alternative="stationary", k=4)  
+
+#Checking for Seasonal Non-stationarity
+adf.test(df$Sales, alternative="stationary", k=12)
+
+```
+
+
+```{r , echo = TRUE}
+# First differencing trend 
+tsdisplay(diff(df$Sales,1), lag=50)
+
+# First differencing seasonal
+tsdisplay(diff(df$Sales,12), lag=50)
+
+# Both seasonal and trend differencing 
+tsdisplay(diff(diff(df$Sales,12),1), lag=50)
+
+```
+
+
+```{r , echo = TRUE}
+# Checking for stationarity in trend after first differencing
+
+k = trunc((length(diff(df$Sales,12))-1)^(1/3))
+k
+adf.test(diff(df$Sales,1), alternative="stationary", k=3)
+         
+# Checking for stationarity in seasonality after first differencing
+adf.test(diff(df$Sales,12), alternative="stationary", k=3)    
+
+# Checking for stationarity in both seasonality and trend         
+         
+adf.test(diff(diff(df$Sales,12),1), alternative="stationary", k=3)
+
+```
+
+```{r , echo = TRUE}
+# Checking for the ARIMA model
+fit1 <- Arima(df$Sales, order=c(0,1,1), seasonal = list(order = c(1, 1, 0), period=12))
+fit1
+summary(fit1)
+```
+
+```{r , echo = TRUE}
+fit2 <- Arima(df$Sales, order=c(1,1,1), seasonal = list(order = c(1, 1, 1), period=12))
+fit2
+summary(fit2)
+```
+
+```{r , echo = TRUE}
+
+fit3 <- Arima(df$Sales, order=c(0,1,0), seasonal = list(order = c(0, 1, 0), period=12))
+
+fit3
+summary(fit3)
+```
+
+```{r , echo = TRUE}
+fit <- Arima(df$Sales, order=c(1,1,1), seasonal = list(order = c(1, 1, 1), period=12))
+fit
+summary(fit)
+```
+
+
+
+```{r , echo = TRUE}
+Box.test(residuals(fit1), lag=12, fitdf=2, type="Ljung")
+b2<-tsdiag(fit1)
+b2
+
+
+```
+
+```{r , echo = TRUE}
+
+forecast_no_holdout <- forecast(fit1,h=5)
+summary(forecast_no_holdout)
+
+fcst_hold<-((abs(hold-forecast_no_holdout$mean)/hold))*100
+mean(fcst_hold)
+
+
+```
+
+```{r}
+library(TSA)
+covariate_x<-data.frame(df$Diwali,df$Ramzan,df$Tax,df$Budget,df$`3M`,df$`3M Growth`)
+
+m3<-arimax(df$Sales, order=c(0,1,1),  seasonal = list(order = c(1, 1, 0), period = 12),
+           xtransf =covariate_x ,method = c("ML"))
+
+summary(m3)
+ 
+```
+
+
+```{r}
+
+m3$fitted
+
+###Diagnostics
+tsdiag(m3)
+
+#Box.test(residuals(m1), lag= 10, type="Ljung")
+#Box.test(residuals(m1), lag= 24, type="Ljung")
+Box.test(residuals(m3), lag= 10, type="Ljung")
+
+res <- residuals(m3)
+tsdisplay(res)
+
+f<-forecast(m3,h=5, xreg=covariate_x)
+f
+plot(f)
+
+```
+
+```{r , echo = TRUE}
+
+
+summary(f)
+
+fcst_hold<-((abs(hold-f$mean)/hold))*100
+mean(fcst_hold)
+
+
+```
+
+```{r , echo = TRUE}
+# Checking for the ARIMA model
+fit_ses <- ses(df$Sales)
+summary(fit_ses)
+#Plot the forecasted values
+plot(fit_ses)
+fcst_hold<-((abs(hold-fit_ses$mean)/hold))*100
+mean(fcst_hold)
+
+
+```
+
+```{r , echo = TRUE}
+##Fit Holt exponential smoothing model 
+fit_holt <- holt(df$Sales)
+summary(fit_holt)
+fcst_hold<-((abs(hold-fit_holt$mean)/hold))*100
+mean(fcst_hold)
+
+```
+
+
+```{r , echo = TRUE}
+##Fit Holt-Winters exponential smoothing model 
+##Converting the data as Time Series
+
+y1 <- ts(data.matrix(df$Sales), start = as.Date("2016-04-01"), end = as.Date("2019-02-01"), frequency=12)
+y1
+is.ts(y1)
+str(y1)
+
+##Fit with hw
+fit_hw <- hw(y1, h =5 , seasonal = c("additive","multiplicative"))
+summary(fit_hw)
+#Plot the forecasted values
+plot(fit_hw)
+
+fit_hw <- HoltWinters(y1, seasonal = "mult")
+fit_hw
+pred <- predict(fit_hw, 5, prediction.interval = TRUE)
+plot(fit_hw, pred)
+
+```
+
+```{r , echo = TRUE}
+##Fit Holt exponential smoothing model
+fit_auto <- forecast(df$Sales, h = 5)
+summary(fit_auto)
+#Plot the forecasted values
+plot(forecast(fit_auto))
+fit_holt <- holt(df$Sales)
+summary(fit_holt)
+fcst_hold<-((abs(hold-fit_holt$mean)/hold))*100
+mean(fcst_hold)
+
+```
+

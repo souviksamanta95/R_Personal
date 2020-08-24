@@ -55,6 +55,8 @@ install.packages("tcltk")
 install.packages("uroot")
 install.packages("pdR")
 install.packages("stats")
+install.packages("FinTS")
+install.packages("rugarch")
 
 
 

@@ -1,0 +1,138 @@
+rm(list=ls())
+library(forecast)
+library(graphics)
+library(stats)
+library(tseries)
+library(forecast)
+library(plm)
+library(Formula)
+library(tcltk)
+library(uroot)
+library(pdR)
+library(rugarch)
+library(MTS)
+options (scipen=99999)
+setwd("D:/Analytics/R/PRA/datasets")
+df=read.csv("png.csv",header = T)
+
+str(df)
+sum(is.na(df))
+nrow(df)
+
+#Plots: Graphs, ACF and PACF-------
+##Identification: TREND: Level
+tsdisplay(df$Close, lag=50)   #Graph, ACF, PACF
+
+##Unit Root Tests: Trend -----------
+k = trunc(length(df$Close)-1)^(1/3)  #k= number of lags
+k
+
+adf.test(df$Close, alternative="stationary", k=6)  #Trend Non-stationarity
+adf.test(df$Close, alternative="stationary", k=12)
+
+##Identification: First Difference/Trend Differencing
+
+tsdisplay(diff(df$Close,1), lag=50)   #Graph, ACF, PACF
+k = trunc((length(diff(df$Close,1))-1)^(1/3))
+k
+adf.test(diff(df$Close,1), alternative="stationary", k=6)  
+adf.test(diff(df$Close,5), alternative="stationary", k=6)  
+
+##Identification: SEASONAL: Seasonal Differencing
+tsdisplay(diff(df$Close,5), lag=50)   #Graph, ACF, PACF
+
+##Estimation
+fit <- Arima(df$Close, order=c(1,0,1), seasonal = list(order = c(4, 1, 0), period=5))
+summary(fit)
+
+##Diagnostics
+#windows()
+tsdisplay(fit$residuals)
+Box.test(residuals(fit), lag=10, fitdf=6, type="Ljung")
+tsdiag(fit)
+
+#ARIMA Forecasting
+fit.forecast <- forecast(fit,h=10)
+fit.forecast$mean
+plot(fit.forecast, type="l")
+lines(fit.forecast$mean,col = "green")
+plot(fit$residuals, col="green")
+
+
+#Normality Test
+jarque.bera.test(fit$residuals)
+
+#GARCH ESTIMATION
+#archTest
+archTest(fit$residuals, lag=30) #long-term
+archTest(fit$residuals, lag=20) #20 day
+archTest(fit$residuals, lag=10) #medium-term
+archTest(fit$residuals, lag=5) #short-term
+
+#GARCH Specification - sGARCH
+ug_spec1_1 <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1, 1), 
+                                            submodel = NULL, external.regressors = NULL, variance.targeting = FALSE), 
+                      mean.model = list(armaOrder=c(0,0), include.mean = FALSE), 
+                      distribution.model ="std")
+
+ug_spec1_2 <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1, 1), 
+                                            submodel = NULL, external.regressors = NULL, variance.targeting = FALSE), 
+                      mean.model = list(armaOrder=c(0,0), include.mean = FALSE), 
+                      distribution.model ="sstd")
+
+ug_spec1_3 <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1, 1), 
+                                            submodel = NULL, external.regressors = NULL, variance.targeting = FALSE), 
+                      mean.model = list(armaOrder=c(0,0), include.mean = FALSE), 
+                      distribution.model ="ged")
+
+# eGARCH failed to converge
+
+#GARCH Specification - gjrGARCH
+ug_spec2_1 <- ugarchspec(variance.model = list(model = "gjrGARCH", garchOrder = c(1, 1), 
+                                               submodel = NULL, external.regressors = NULL, variance.targeting = FALSE), 
+                         mean.model = list(armaOrder=c(0,0), include.mean = FALSE), 
+                         distribution.model ="std")
+
+ug_spec2_2 <- ugarchspec(variance.model = list(model = "gjrGARCH", garchOrder = c(1, 1), 
+                                               submodel = NULL, external.regressors = NULL, variance.targeting = FALSE), 
+                         mean.model = list(armaOrder=c(0,0), include.mean = FALSE), 
+                         distribution.model ="sstd")
+
+ug_spec2_3 <- ugarchspec(variance.model = list(model = "gjrGARCH", garchOrder = c(1, 1), 
+                                               submodel = NULL, external.regressors = NULL, variance.targeting = FALSE), 
+                         mean.model = list(armaOrder=c(0,0), include.mean = FALSE), 
+                         distribution.model ="ged")
+
+
+#Fit GARCH models
+ug_fit1 <- ugarchfit(spec=ug_spec1_1, data=fit$residuals)
+ug_fit2 <- ugarchfit(spec=ug_spec1_2, data=fit$residuals)
+ug_fit3 <- ugarchfit(spec=ug_spec1_3, data=fit$residuals)
+ug_fit4 <- ugarchfit(spec=ug_spec2_1, data=fit$residuals)
+ug_fit5 <- ugarchfit(spec=ug_spec2_2, data=fit$residuals)
+ug_fit6 <- ugarchfit(spec=ug_spec2_3, data=fit$residuals)
+
+
+ug_fit1
+ug_fit2
+ug_fit3
+ug_fit4
+ug_fit5
+ug_fit6
+
+
+#Estimated conditional variance
+ug_var1 <- ug_fit1@fit$var
+ug_var2 <- ug_fit2@fit$var
+ug_var3 <- ug_fit3@fit$var
+ug_var4 <- ug_fit4@fit$var
+ug_var5 <- ug_fit5@fit$var
+ug_var6 <- ug_fit6@fit$var
+
+#ARIMA RESIDUALS/ACTUAL variance
+ug_res <- (fit$residuals)^2
+
+
+##Actual Variance
+plot(ug_res,typ="l")
+lines(ug_res,col="green")+lines(ug_var1,col = "orange")

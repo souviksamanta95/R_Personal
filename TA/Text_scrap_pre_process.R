@@ -96,3 +96,4 @@ fig <- ggplot(dfplot, aes(x=word, y=value)) + geom_bar(stat="identity")
 fig <- fig + xlab("Word in Corpus")
 fig <- fig + ylab("Count")
 print(fig)
+ 

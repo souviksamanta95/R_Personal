@@ -9,8 +9,8 @@ library (rmgarch)
 options (scipen=99999)
 
 #Import Data
-startDate=as.Date("2011-04-01")
-endDate=as.Date("2019-11-30")
+startDate=as.Date("2016-04-01")
+endDate=as.Date("2019-12-31")
 
 getSymbols("IBM",  from=startDate, to=endDate)
 getSymbols("GOOG", from=startDate, to=endDate)
@@ -74,14 +74,14 @@ plot(as.xts(cor1[1,3,]), main = "IBM and Google")
 plot(as.xts(cor1[2,3,]), main = "BP and Google")
 
 
-##Kroner and Sultan Time Varying Hedging Ratio
+##Kroner and Sultan Time Varying Hedging Ratio/equation #6
 beta12<-cov1[1,2,]/cov1[2,2,]
 beta12<-as.xts(beta12)
 plot(beta12)
 beta12_avg<-mean(beta12)
 beta12_avg
 
-beta13<-cov1[1,3,]/cov1[1,1,]
+beta13<-cov1[1,3,]/cov1[3,3,]
 beta13<-as.xts(beta13)
 plot(beta13)
 
@@ -90,7 +90,7 @@ beta21<-as.xts(beta21)
 beta21_avg<-mean()
 plot(beta21)
 
-beta23<-cov1[2,3,]/cov1[2,2,]
+beta23<-cov1[2,3,]/cov1[3,3,]
 beta23<-as.xts(beta23)
 plot(beta23)
 
@@ -105,7 +105,7 @@ plot(beta32)
 beta<-data.frame(beta12,beta13,beta21,beta23,beta31,beta32)
 write.csv (beta, "beta.csv")
 
-##Kroner and Ng Portfolio Weights
+##Kroner and Ng Portfolio Weights: eqn#7
 
 w12<-(cov1[2,2,]-cov1[1,2,])/(cov1[1,1,]-2*cov1[1,2,]+cov1[2,2,])
 w12<-as.xts(w12)

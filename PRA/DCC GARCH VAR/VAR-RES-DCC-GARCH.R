@@ -113,15 +113,17 @@ plot(as.xts(cor1[1,3,]), main = "IBM and Google")
 plot(as.xts(cor1[2,3,]), main = "BP and Google")
 
 
-##Kroner and Sultan Time Varying Hedging Ratio
+##Kroner and Sultan Time Varying Hedging Ratio/Eqn#6
 beta12<-cov1[1,2,]/cov1[2,2,]
 beta12<-as.xts(beta12)
 plot(beta12)
 beta12_avg<-mean(beta12)
 beta12_avg
 
-beta13<-cov1[1,3,]/cov1[1,1,]
+beta13<-cov1[1,3,]/cov1[3,3,]
 beta13<-as.xts(beta13)
+beta13_avg<-mean(beta13)
+beta13_avg
 plot(beta13)
 
 beta21<-cov1[1,2,]/cov1[2,2,]
@@ -146,7 +148,7 @@ plot(beta32)
 beta<-data.frame(beta12,beta13,beta21,beta23,beta31,beta32)
 write.csv (beta, "beta.csv")
 
-##Kroner and Ng Portfolio Weights
+##Kroner and Ng Portfolio Weights/Eqn#7
 
 w12<-(cov1[2,2,]-cov1[1,2,])/(cov1[1,1,]-2*cov1[1,2,]+cov1[2,2,])
 w12<-as.xts(w12)
@@ -166,7 +168,8 @@ write.csv (wgt, "weight.csv")
 ##Similarly for w13, w21, w23, w31, w32
 
 ##Forecasts of Covariance and Correlation
-dccf1<-dccforecast(fit1, n.ahead=10);plot(dccf1)
+dccf1<-dccforecast(fit1, n.ahead=10)
+plot(dccf1)
 
 ##Actual forecasts for the correlation 
 names (dccf1@mforecast)

@@ -1,0 +1,192 @@
+---
+title: "Text Analytics Group Assignment"
+author: "Group - 4"
+date: "10/09/2020"
+output: word_document
+---
+## Loading libraries
+```{r, results='hide'}
+library(dplyr)
+library(rvest)
+library(stringr)
+library(tidyverse)
+library(dplyr)
+library(SnowballC)
+library(textstem)
+library(tm)
+library(NLP)
+library(reshape2)
+library(ggplot2)
+library(tidyr)
+library(igraph)
+library(ggraph)
+library(tidytext)
+library(wordcloud)
+library(textdata)
+```
+
+## Scraping Reviews from FLIPKART
+```{r}
+# Defining scraper function
+scrape <- function(url){
+flk <- read_html(url)
+
+flk %>% html_nodes("[class='_2xg6Ul']") %>% html_text() %>% gsub("[^\x01-\x7F]", "", .) -> ttl
+
+flk %>% html_nodes("[class='qwjRop']") %>%  html_text() %>% gsub("READ MORE", "", .)  %>% gsub("[^\x01-\x7F]", "", .)-> rv
+
+rvw <- data.frame("Title" = ttl, "Review" = rv)
+return(rvw)
+}
+
+# Generating links on which links for individual phones are found
+url <- c()
+for (i in seq(1,5)){
+  ur <- paste("https://www.flipkart.com/mobiles/mi~brand/pr?sid=tyy%2C4io&otracker=nmenu_sub_Electronics_0_Mi&page=",i) %>% gsub(" ", "", .)
+  url <- c(url,ur)
+}
+
+# Gathering urls on which scraping will be done
+url_list <- c()
+for (i in url)
+{
+  flk <- read_html(i)
+  ff <- flk %>% html_nodes("[class='_31qSD5']") %>% html_attr("href")
+  j <- 1
+  nn <- c()
+  for (i in ff)
+  {
+    nn[j] <- paste("https://www.flipkart.com",i) %>% gsub(" ", "", .)
+    j <- j + 1
+  }
+  url_list <- c(url_list, nn)
+}
+
+# Defining blank data frame for capturing data
+textdata <- data.frame(Title=character(), Review=character())
+
+# Running scraper
+for (i in url_list){
+textdata <- rbind(textdata,scrape(i))}
+```
+
+## Preprocessing the data frame for text data
+```{r}
+colnames(textdata)
+str(textdata)
+
+# Load the data as a corpus
+docs <- VCorpus(VectorSource(textdata$Review))
+
+#Text transformation
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+
+#Cleaning the text
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove english common stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+
+# Remove punctuation
+docs <- tm_map(docs, removePunctuation)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+
+for(i in 1:100){
+  writeLines(as.character(docs[[i]]))
+}
+```
+# Build a term-document matrix
+```{r}
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d, 10)
+
+# Generate the Word cloud
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+
+names(textdata$Review) = "text"
+textdata<-mutate(textdata,text= as.character(Review))
+data_bigrams <- textdata %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)%>%
+  count(bigram,sort=TRUE)
+head(data_bigrams,50)
+
+# Deleting stop words
+bigrams_separated <- data_bigrams %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
+
+bigrams_filtered <- bigrams_separated %>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word)
+
+# New bigram counts:
+bigram_counts <- bigrams_filtered %>% 
+  count(word1, word2, sort = TRUE)
+
+head(bigram_counts,50)
+
+## combine words
+bigrams_united <- bigrams_filtered %>%
+  unite(bigram, word1, word2, sep = " ")
+head(bigrams_united, 50)
+```
+# SENTIMENT ANALYSIS
+```{r}
+# Tokenise
+textdata$Review<-as.character(textdata$Review)
+review_tidy <- textdata %>% unnest_tokens(word, Review)
+# View(textdata)
+# View(review_tidy)
+
+# Count
+review_tidy %>% count(word) %>% arrange(desc(n)) %>% head(., 50)
+
+# Remove stop words -
+# http://snowball.tartarus.org/algorithms/english/stop.txt
+# http://www.lextek.com/manuals/onix/stopwords1.html
+
+review_tidy2 <- review_tidy %>% anti_join(stop_words)
+
+# Count
+word_count<-review_tidy2 %>% count(word) %>% arrange(desc(n))
+
+# Visualization
+ggplot(word_count, aes(x = word, y = n)) + geom_col()
+
+# Count
+word_count2 <- review_tidy2 %>% count(word) %>% filter(n>200) %>% arrange(desc(n))
+ggplot(word_count2, aes(x = word, y = n)) + geom_col() + ggtitle("Word Counts")
+
+# SENTIMENT Analysis
+get_sentiments("bing")
+get_sentiments("afinn")
+get_sentiments("loughran")
+get_sentiments("nrc")
+
+sentiment_review1 <- review_tidy2 %>% inner_join(get_sentiments("bing"))
+sentiment_review1<-sentiment_review1 %>% count(sentiment)%>% filter(n>200)%>% arrange(desc(n))
+
+sentiment_review2 <- review_tidy2 %>% inner_join(get_sentiments("loughran"))
+sentiment_review2<-sentiment_review2 %>% count(sentiment)%>% filter(n>200)%>% arrange(desc(n))
+
+sentiment_review3 <- review_tidy2 %>% inner_join(get_sentiments("nrc"))
+sentiment_review3<-sentiment_review3 %>% count(sentiment)%>% filter(n>200)%>% arrange(desc(n))
+
+sentiment_review3 %>% count(sentiment) %>% arrange(desc(n))
+pos_neg <- sentiment_review3 %>% count(sentiment) %>% filter(sentiment %in% c("positive", "negative"))
+pos_neg
+ggplot(sentiment_review1, aes(x = n, y = sentiment)) + geom_col() + ggtitle("BING library results") + xlab("Counts")
+ggplot(sentiment_review2, aes(x = n, y = sentiment)) + geom_col() + ggtitle("Loughran library results") + xlab("Counts")
+ggplot(sentiment_review3, aes(x = n, y = sentiment)) + geom_col() + ggtitle("NRC library results") + xlab("Counts")
+```

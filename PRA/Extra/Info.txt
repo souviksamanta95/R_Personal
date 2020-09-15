@@ -1,0 +1,9 @@
+Pair-Trading-TCS-Infy-Cointegration, Pair-Trading-TCS-Infy-Correlation/Bivariate Way
+
+
+These files can be used as guidelines in deriving the hedging effectiveness
+of the following two modelling strategies
+
+Mean + Variance Modelling/VAR+DCC-GARCH Modelling
+VS
+Variance Modelling/DCC-GARCH only

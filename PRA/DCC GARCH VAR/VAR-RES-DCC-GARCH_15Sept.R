@@ -18,7 +18,6 @@ library ("rugarch")
 library ("rmgarch")
 library("xts")
 
-
 options (scipen=99999)
 #Import Data
 startDate=as.Date("2016-04-01")
@@ -28,14 +27,27 @@ getSymbols("IBM",  from=startDate, to=endDate)
 getSymbols("GOOG", from=startDate, to=endDate)
 getSymbols("BP",   from=startDate, to=endDate)
 
-rIBM<-dailyReturn(IBM)
-rBP<-dailyReturn(BP)
+rIBM<-monthlyReturn(IBM)
+rBP<-monthlyReturn(BP)
 rGOOG<-dailyReturn(GOOG)
+
+
+tsdisplay(rIBM)
+tsdisplay(rBP)
+
+rIBM<-diff(IBM,5)
+tsdisplay(rIBM)
+tsdisplay(diff(IBM,5),lag=30)
+
+rBP<-diff(BP,5)
+rGOOG<-diff(GOOG,5)
 
 rIBM<-weeklyReturn(IBM)
 rBP<-weeklyReturn(BP)
 rGOOG<-weeklyReturn(GOOG)
 
+
+?weeklyReturn
 rX <-data.frame(rIBM, rBP, rGOOG)
 
 names (rX) [1] <-"rIBM"
@@ -145,7 +157,7 @@ plot(beta31)
 beta32<-cov1[3,2,]/cov1[3,3,]
 beta32<-as.xts(beta32)
 plot(beta32)
-setwd("/media/souvik/Analytics/R/PRA/Assignment/VAR")
+
 beta<-data.frame(beta12,beta13,beta21,beta23,beta31,beta32)
 write.csv (beta, "beta.csv")
 

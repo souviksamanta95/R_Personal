@@ -1,0 +1,8 @@
+1. rgnp  : Real GNP.
+2. pgnp  : Potential real GNP.
+3. ulc   : Unit labor cost.
+4. gdfco : Fixed weight deflator for personal consumption expenditure excluding food and energy.
+5. gdf   : Fixed weight GNP deflator.
+6. gdfim : Fixed weight import deflator.
+7. gdfcf : Fixed weight deflator for food in personal consumption expenditure.
+8. gdfce : Fixed weight deflator for energy in personal consumption expenditure

@@ -1,13 +1,14 @@
 getwd()
-setwd("C:/Users/souvi/Documents/R/BA/KNN")
+setwd("/media/souvik/SSD2/Analytics/R/BA/Dataset")
 
 movies <-  read.csv("movies.csv")
 str(movies)
 head(movies)
 summary(movies)
+View(movies)
 # KNN Imputation
 # KNN is present in VIM Package
-# install.packages("VIM")
+install.packages("VIM")
 library("VIM")
 ?kNN()
 # Impute the missing values in some variables

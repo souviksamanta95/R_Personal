@@ -1,8 +1,14 @@
+---
+title: "Presentation on VAR and DCC GARCH"
+author: Group - 5
+date: 17/09/20
+output: slidy_presentation
+---
+# Loading Libraries and reading the dataset
+```{r}
 rm(list=ls())
 cat("\014")
-
 setwd("/media/souvik/Analytics/R/PRA/Assignment/VAR")
-
 library ("vars")
 library ("forecast")
 library("tseries")
@@ -10,13 +16,13 @@ library ("rugarch")
 library ("rmgarch")
 library("xts")
 library("tvReg")
-
-
 df <- read.csv("dataset_VAR.csv")
 df$Gold <- as.numeric(df$Gold)
-names(df)
 str(df)
+```
 
+#
+```{r}
 # For daily return series
 tsdisplay(diff(log(df$Snp), 1))
 tsdisplay(diff(log(df$Gold), 1))
@@ -32,30 +38,28 @@ rSNP <- diff(log(df$Snp), 5)
 rGOLD <- diff(log(df$Gold), 5)
 rOIL <- diff(log(df$Oil), 5)
 
+# Creating the daily return series
+rSNP1 <- diff(log(df$Snp), 1)
+rGOLD1 <- diff(log(df$Gold), 1)
+rOIL1 <- diff(log(df$Oil), 1)
+
 # Weekly return plots
 plot(rSNP, type = "l")
 plot(rGOLD, type = "l")
 plot(rOIL, type = "l")
 
 rX <-data.frame(rSNP, rGOLD, rOIL)
-
+rX1 <-data.frame(rSNP1, rGOLD1, rOIL1)
+```
+# VAR Modelling and estimate
+```{r}
 ndiffs(rX[,"rSNP"], alpha=0.05, test= "adf")
 ndiffs(rX[,"rGOLD"], alpha = 0.05, test = "adf")
 ndiffs(rX[,"rOIL"], alpha = 0.05, test = "adf")
 
-VARselect(rX, lag.max=20, type="const") [["selection"]]
+VARselect(rX, lag.max=10, type="const") [["selection"]]
 var_est <- VAR(rX, p=6, type="const", season = NULL)
 summary(var_est)
-
-# Granger Causality check
-grangertest(rX$rSNP ~ rX$rGOLD, order = 1)
-grangertest(rX$rGOLD ~ rX$rSNP, order = 1)
-
-grangertest(rX$rSNP ~ rX$rOIL, order = 1)
-grangertest(rX$rOIL ~ rX$rSNP, order = 1) # Calusality effect from SNP to OIL
-
-grangertest(rX$rOIL ~ rX$rGOLD, order = 1)
-grangertest(rX$rGOLD ~ rX$rOIL, order = 1)
 
 # Extracting residuals data from VAR estimates
 RES_rSNP <- var_est$varresult$rSNP$residuals
@@ -76,7 +80,21 @@ arch.test(var_est, lags.multi = 15)
 arch.test(var_est, lags.multi = 20)
 #Test for normality
 normality.test(var_est, multivariate.only = TRUE)
+```
+# Causality effect check
+```{r}
+# Granger Causality check
+grangertest(rX$rSNP ~ rX$rGOLD, order = 1)
+grangertest(rX$rGOLD ~ rX$rSNP, order = 1)
 
+grangertest(rX$rSNP ~ rX$rOIL, order = 1)
+grangertest(rX$rOIL ~ rX$rSNP, order = 1) # Calusality effect from SNP to OIL
+
+grangertest(rX$rOIL ~ rX$rGOLD, order = 1)
+grangertest(rX$rGOLD ~ rX$rOIL, order = 1)
+```
+# Multivariate GARCH Modelling
+```{r}
 #Dynamic Conditional Correlation Model (DCC) GARCH: Multivariate GARCH
 ##Model Setup DCC
 
@@ -84,7 +102,7 @@ uspec.n <- multispec(replicate(3, ugarchspec(mean.model=list(armaOrder=c(0,0))
                                                  ,distribution.model ="std")))
 ##Estimate these Univariate GARCH models using 'multifit' command
 
-multf<-multifit(uspec.n,RES_rX)
+multf<-multifit(uspec.n,rX1)
 multf
 
 ##Specify correlation specification using 'dccspec'
@@ -93,9 +111,11 @@ spec1 <- dccspec(uspec=uspec.n, dccOrder=c(1,1), distribution='mvnorm')
 
 ##Estimate using 'dccfit'
 #VAR.fit=var_est
-fit1 <- dccfit(spec1, data=RES_rX, fit.control=list(eval.se=TRUE), fit=multf)
+fit1 <- dccfit(spec1, data=rX1, fit.control=list(eval.se=TRUE), fit=multf)
 fit1
-
+```
+# Estimating and plotting Correlations
+```{r}
 ##Time Varying Covariance and Correlation Matrices
 cov1<-rcov(fit1)  #covariance
 dim(cov1)
@@ -104,147 +124,85 @@ dim(cor1)
 
 cor1[,,dim(cor1)[3]] ##Last day correlation matrix
 
-cor_BG <- cor1[2,3,] ##Row 2, Col 3 for all days
-cor_BG <- as.xts(cor_BG)
-cor_BG
-
-##Plot Time Varying Correlation between SNP and OIL
-plot(cor_BG)
-
 ##Plotting all three correlations between the three assets
-#dev.off()
 par(mfrow=c(3,1))  ##creating a frame of three windows to be filled by plots
 plot(as.xts(cor1[1,2,]), main = "Gold and SNP")
 plot(as.xts(cor1[1,3,]), main = "SNP and Oil")
 plot(as.xts(cor1[2,3,]), main = "Gold and Oil")
-
-par(mfrow=c(1,1))
-# CORRELATION is done till now
-
+```
+# Estimating Hedging Ratios
+```{r}
 ##Kroner and Sultan Time Varying Hedging Ratio/Eqn#6
+par(mfrow=c(3,1))  ##creating a frame of three windows to be filled by plots
+# For SNP > GOLD
 beta12 <- cov1[1,2,]/cov1[2,2,]
 beta12 <- as.xts(beta12)
 plot(beta12)
 beta12_avg<-mean(beta12)
 beta12_avg
 
+# For GOLD and OIL
+beta23<-cov1[2,3,]/cov1[2,2,]
+beta23<-as.xts(beta23)
+plot(beta23)
+beta23_avg<-mean(beta23)
+beta23_avg
+
+# For SNP > OIL
 beta13<-cov1[1,3,]/cov1[3,3,]
 beta13<-as.xts(beta13)
 beta13_avg<-mean(beta13)
 beta13_avg
 plot(beta13)
 
+# For GOLD > SNP
 beta21<-cov1[1,2,]/cov1[2,2,]
 beta21<-as.xts(beta21)
-beta21_avg<-mean(beta21)
-beta21_avg
-plot(beta21)
 
-beta23<-cov1[2,3,]/cov1[2,2,]
-beta23<-as.xts(beta23)
-beta23_avg<-mean(beta23)
-beta23_avg
-plot(beta23)
-
+# For OIL > SNP
 beta31<-cov1[3,1,]/cov1[3,3,]
 beta31<-as.xts(beta31)
-plot(beta31)
 
+# For OIL > GOLD
 beta32<-cov1[3,2,]/cov1[3,3,]
 beta32<-as.xts(beta32)
-plot(beta32)
 
 beta <- data.frame(beta12,beta13,beta21,beta23,beta31,beta32)
-write.csv (beta, "beta.csv")
-
-##Kroner and Ng Portfolio Weights/Eqn#7
+head(beta)
+```
+# Estimating weights in portfolio
+```{r}
+#Kroner and Ng Portfolio Weights/Eqn#7
+par(mfrow=c(2,1))  ##creating a frame of three windows to be filled by plots
 
 w12<-(cov1[2,2,]-cov1[1,2,])/(cov1[1,1,]-2*cov1[1,2,]+cov1[2,2,])
 w12<-as.xts(w12)
 plot(w12)
 
-w13<-(cov1[3,3,]-cov1[1,3,])/(cov1[1,1,]-2*cov1[1,3,]+cov1[3,3,])
-w13<-as.xts(w13)
-plot(w13)
-
 w21<-(cov1[1,1,]-cov1[2,1,])/(cov1[2,2,]-2*cov1[2,1,]+cov1[1,1,])
 w21<-as.xts(w21)
 plot(w21)
 
-wgt<-data.frame(w12, w13, w21)
-write.csv (wgt, "weight.csv")
+w23<-(cov1[3,3,]-cov1[2,3,])/(cov1[2,2,]-2*cov1[2,3,]+cov1[3,3,])
+w23<-as.xts(w23)
+plot(w23)
 
-##Similarly for w13, w21, w23, w31, w32
+w32<-(cov1[2,2,]-cov1[3,2,])/(cov1[3,3,]-2*cov1[3,2,]+cov1[2,2,])
+w32<-as.xts(w32)
+plot(w32)
 
-##Forecasts of Covariance and Correlation
+w31<-(cov1[1,1,]-cov1[3,1,])/(cov1[3,3,]-2*cov1[3,1,]+cov1[1,1,])
+w31<-as.xts(w31)
+plot(w31)
+
+w13<-(cov1[3,3,]-cov1[1,3,])/(cov1[1,1,]-2*cov1[1,3,]+cov1[3,3,])
+w13<-as.xts(w13)
+plot(w13)
+
+wgt<-data.frame(w12, w21, w23, w32, w31, w13)
+head(wgt)
+```
+```{r}
 dccf1 <- dccforecast(fit1, n.ahead=10)
 plot(dccf1)
-
-##Actual forecasts for the correlation
-names (dccf1@mforecast)
-Rhf<-dccf1@mforecast$H #covariance
-Rf <-dccf1@mforecast$R #correlation
-
-##To extract forecasts for all three assets and then plot
-
-corf_IB<-Rf[[1]][1,2,] ##IBM and BP
-plot(corf_IB, type='l');
-corf_IG<-Rf[[1]][1,3,] ##IBM and Google
-plot(corf_IG, type='l')
-corf_BG<-Rf[[1]][2,3,] ##BP and Google
-
-#Last in-sample estimates of correlation
-
-par(mfrow=c(3,1))
-c_IB<-c(tail(cor1[1,2,],20), rep(NA,10)) #getting last 20 correlation
-c_IB
-cf_IB<-c(rep(NA, 20), corf_IB) #getting the last 10 forecasts
-cf_IB
-plot(c_IB, type="l", main ="cor IBM and BP")
-lines (cf_IB, type="l", col="orange")
-
-##Similarly for other two C_IG and C_BG
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```

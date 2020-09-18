@@ -42,12 +42,6 @@ tsdisplay(diff(IBM,5),lag=30)
 rBP<-diff(BP,5)
 rGOOG<-diff(GOOG,5)
 
-rIBM<-weeklyReturn(IBM)
-rBP<-weeklyReturn(BP)
-rGOOG<-weeklyReturn(GOOG)
-
-
-?weeklyReturn
 rX <-data.frame(rIBM, rBP, rGOOG)
 
 names (rX) [1] <-"rIBM"

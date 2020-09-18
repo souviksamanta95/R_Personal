@@ -2,10 +2,10 @@ rm(list=ls())
 cat("\014")
 dev.off()
 
-# install.packages("vars")
-# install.packages("forecast")
-# install.packages("tseries")
-# install.packages("tvReg")
+install.packages("vars")
+install.packages("forecast")
+install.packages("tseries")
+install.packages("tvReg")
 
 library ("vars")
 library ("forecast")
@@ -24,7 +24,7 @@ library("tvReg")
 
 #Import Data
 options (scipen=99999)
-data<-read.csv("/media/souvik/Analytics/R/PRA/VAR_Project/yield-macro.csv",header=TRUE)
+data<-read.csv(file.choose(),header=TRUE)
 df<-data
 df<-data[-c(8,9)]
 nrow(df)
@@ -33,7 +33,7 @@ head(df)
 View(df)
 
 windows()
-plot.ts(df[-1])
+plot.ts(df)
 summary(df)
 
 #Train
@@ -78,7 +78,7 @@ plot.ts(df)
 #Lag optimisation
 #VARselect(d_df, lag.max = 10, type = "both") [["selection"]]
 VARselect(df[,1:6],lag.max=9,type="both") [["selection"]]
-VARselect(df[,1:6],lag.max=9,type="const") [["selection"]] # We should be running this for stationary data
+VARselect(df[,1:6],lag.max=9,type="const") [["selection"]]
 
 #Vector autoregression with lags set according to results of lag optimisation. 
 var_est <- VAR(df[,1:6], p=1, type = "const")

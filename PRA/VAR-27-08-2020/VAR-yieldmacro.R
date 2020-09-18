@@ -24,7 +24,7 @@ library("tvReg")
 
 #Import Data
 options (scipen=99999)
-data<-read.csv(file.choose(),header=TRUE)
+data<-read.csv("/media/souvik/Analytics/R/PRA/VAR-27-08-2020/er-wpi.csv")
 df<-data
 nrow(df)
 ncol(df)

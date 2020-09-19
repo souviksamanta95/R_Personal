@@ -6,8 +6,6 @@ y = NelsonSiegelSvenssonCurve(0.028, -0.03, -0.04, -0.015, 1.1, 4.0)
 t = np.linspace(0, 20, 100)
 plot(t, y(t))
 
-
-
 from matplotlib import pyplot as plt
 plt.show()
 

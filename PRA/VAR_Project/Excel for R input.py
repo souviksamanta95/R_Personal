@@ -3,6 +3,7 @@ import xlrd
 import numpy as np
 import pandas as pd
 from nelson_siegel_svensson.calibrate import calibrate_nss_ols
+
 dataloc = '/media/souvik/ZCYC'
 os.chdir(dataloc)
 filenames = os.listdir(dataloc)
@@ -10,9 +11,10 @@ filenames = os.listdir(dataloc)
 
 # Defining function for making array of maturity and yield from excel
 def get_array(ws):
-    t = np.array([ws.cell_value(i, 0) for i in range(8, 69)])
-    y = np.array([ws.cell_value(i, 1) for i in range(8, 69)])
-    return(t, y)
+    t = list([ws.cell_value(i, 0) for i in range(8, 69)])
+    y = list([ws.cell_value(i, 1) for i in range(8, 69)])
+    return (t, y)
+
 
 error_files = []
 beta0, beta1, beta2, beta3, tau1, tau2 = [], [], [], [], [], []
@@ -57,4 +59,55 @@ df = pd.DataFrame({'Date': dat,
                    'Est_Tau 1': etau1,
                    'Est_Tau 2': etau2})
 
-df.to_csv("/media/souvik/Analytics/R/PRA/VAR_Project/Estimated_Output.csv", index=False)
+df.to_csv("/media/souvik/Analytics/R/PRA/VAR_Project/For_R.csv", index=False)
+
+
+
+i = 0
+mat = [[]]*61
+yld = [[]]*61
+workbook = xlrd.open_workbook(filenames[i])
+worksheet = workbook.sheet_by_name('ZCYC comparison')
+t, y = get_array(worksheet)
+t
+
+
+df = pd.DataFrame({'m1': ,
+
+for k in range(0, 61):
+    mat[i][k] = t[k]
+    yld[i][k] = y[k]
+
+
+
+(t[54])
+
+yld = [i][]
+
+for k in range(0, 61):
+    for l in
+        mat[k] = [[]]
+    yld[k] = []
+
+
+def to_pandas(t, y):
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

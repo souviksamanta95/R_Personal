@@ -15,42 +15,38 @@ xdf <- as.xts(read.zoo(df, FUN = as.Date, format='%d/%m/%Y'))
 # Extracting NSS as estimated by CCIL
 CCIL <- xdf[,1:6]
 
-# Extracting maturity matrix
-mat <- xdf[,7:67]
+# Defining maturity for yield curve
+maturity <- as.numeric(df[1,8:68])
 
 # Extracting yield matrix
-yld <- xdf[,68:128]
-
-# Plot of yields for different time frames
-xyplot.ts(yld,scales=list(y=list(relation="same")),ylab="Yield (%)")
-
-# Combined plot
-xyplot.ts(yld,superpose=TRUE,auto.key=list(columns=4),ylab="Yield (%)")
-
-# Defining variables for any random day
-i <- 56
-rate <- yld[i]
-maturity <- as.numeric(df[1,8:68])
+rate <- xdf[,68:128]
 
 # Fitting Nelson Siegel model
 NSParameters <- Nelson.Siegel(rate= rate, maturity=maturity)
-n_rate <- NSrates(NSParameters, maturity)
-plot(maturity,rate[1,],main="Fitting Nelson-Siegel yield curve", type="o")
+
+# Plotting reults for any day
+i <- 58
+n_rate <- NSrates(NSParameters[i,], maturity)
+plot(maturity,rate[i,],main="Fitting Nelson-Siegel yield curve", type="o")
 lines(maturity,n_rate, col=2)
 legend("topleft",legend=c("observed yield curve","fitted yield curve"), col=c(1,2),lty=1)
 
 # Fitting Svensson function
 SvenssonParameters <- Svensson(rate = rate, maturity = maturity)
-s_rate <- Srates( SvenssonParameters ,maturity,"Spot")
-plot(maturity, rate[1,],main="Fitting Svensson yield curve", type="o")
+
+# Plotting reults for any day
+i <- 58
+s_rate <- Srates( SvenssonParameters[i,] ,maturity,"Spot")
+plot(maturity, rate[i,],main="Fitting Svensson yield curve", type="o")
 lines(maturity, s_rate, col=2)
 legend("topleft",legend=c("observed yield curve","fitted yield curve"), col=c(1,2),lty=1)
 
+# Creating Data frame with dates for export
+df_NS <- cbind(df[1], as.data.frame(NSParameters))
+df_NSS <- cbind(df[1], as.data.frame(SvenssonParameters))
 
-k <- df[56,]
-
-write.csv(k, "/media/souvik/Analytics/R/PRA/VAR_Project/sample.csv")
-
-
+# Exporting outputs
+write.csv(df_NS, "/media/souvik/Analytics/R/PRA/VAR_Project/NS_out.csv", row.names = F)
+write.csv(df_NSS, "/media/souvik/Analytics/R/PRA/VAR_Project/NSS_out.csv", row.names = F)
 
 

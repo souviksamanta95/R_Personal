@@ -11,7 +11,7 @@ filenames = os.listdir(dataloc)
 # Defining function for making array of maturity and yield from excel
 def get_array(ws):
     t = list([ws.cell_value(i, 0) for i in range(8, 69)])
-    y = list([ws.cell_value(i, 1) for i in range(8, 69)])
+    y = list([ws.cell_value(i, 2) for i in range(8, 69)])
     return (t, y)
 
 error_files = []
@@ -144,13 +144,13 @@ for i in range(0, len(filenames)):
     try:
         workbook = xlrd.open_workbook(filenames[i])
         worksheet = workbook.sheet_by_name('ZCYC comparison')
-        dat.append(worksheet.cell_value(0, 1))
-        beta0.append(worksheet.cell_value(1, 1))
-        beta1.append(worksheet.cell_value(2, 1))
-        beta2.append(worksheet.cell_value(3, 1))
-        beta3.append(worksheet.cell_value(5, 1))
-        tau1.append(worksheet.cell_value(4, 1))
-        tau2.append(worksheet.cell_value(6, 1))
+        dat.append(worksheet.cell_value(0, 2))
+        beta0.append(worksheet.cell_value(1, 2))
+        beta1.append(worksheet.cell_value(2, 2))
+        beta2.append(worksheet.cell_value(3, 2))
+        beta3.append(worksheet.cell_value(5, 2))
+        tau1.append(worksheet.cell_value(4, 2))
+        tau2.append(worksheet.cell_value(6, 2))
         t, y = get_array(worksheet)
         y0.append(y[0])
         y1.append(y[1])
@@ -409,4 +409,4 @@ df = pd.DataFrame({'Date': dat,
                     'y59': y59,
                     'y60': y60})
 
-df.to_csv("/media/souvik/Analytics/R/PRA/VAR_Project/For_R.csv", index=False)
+df.to_csv("/media/souvik/Analytics/R/PRA/VAR_Project/Scraping ro R/For_R.csv", index=False)

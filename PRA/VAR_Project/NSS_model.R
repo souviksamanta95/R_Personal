@@ -35,7 +35,7 @@ legend("topleft",legend=c("observed yield curve","fitted yield curve"), col=c(1,
 SvenssonParameters <- Svensson(rate = rate, maturity = maturity)
 
 # Plotting reults for any day
-i <- 58
+i <- 45
 s_rate <- Srates( SvenssonParameters[i,] ,maturity,"Spot")
 plot(maturity, rate[i,],main="Fitting Svensson yield curve", type="o")
 lines(maturity, s_rate, col=2)
@@ -48,5 +48,3 @@ df_NSS <- cbind(df[1], as.data.frame(SvenssonParameters))
 # Exporting outputs
 write.csv(df_NS, "/media/souvik/Analytics/R/PRA/VAR_Project/NS_out.csv", row.names = F)
 write.csv(df_NSS, "/media/souvik/Analytics/R/PRA/VAR_Project/NSS_out.csv", row.names = F)
-
-

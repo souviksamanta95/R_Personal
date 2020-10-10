@@ -1,0 +1,23 @@
+getwd()
+data<-read.csv("Golf data.csv")
+data$Outlook<-factor(data$Outlook)
+data$Temp<-factor(data$Temp)
+data$Humidity<-factor(data$Humidity)
+data$Windy<-factor(data$Windy)
+data$Play.Golf<-factor(data$Play.Golf)
+str(data)
+head(data)
+summary(data)
+
+
+#install.packages("RWeka")
+#install.packages("party")
+library(RWeka)
+library(party)
+fit1 <- J48(Play.Golf ~ Outlook + Temp + Humidity + Windy, data=data)
+# summarize the fit
+summary(fit1)
+#install.packages("partykit")
+library(partykit)
+plot(fit1)
+print(fit1)

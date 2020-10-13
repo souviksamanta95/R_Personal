@@ -1,0 +1,69 @@
+---
+title: "LP Problem"
+author: "Souvik Samanta"
+date: "13/10/2020"
+output: word_document
+---
+# Problem 1
+
+```{r}
+library(lpSolve)
+# Setting objective function
+f.obj <- c(20, 60)
+
+# Defining constraints
+f.con <- matrix(c(30, 20,
+                  5, 10,
+                  1, 1), nrow = 3, byrow = TRUE)
+
+# Set unequality signs
+f.dir <- c("<=",
+           "<=",
+           ">=")
+
+# Set right hand side coefficients
+f.rhs <- c(2700,
+           850,
+           95)
+
+# Final value of objective function
+lp("max", f.obj, f.con, f.dir, f.rhs)
+
+# Final value of optimal parameters
+lp("max", f.obj, f.con, f.dir, f.rhs)$solution
+
+```
+# Problem 2
+```{r}
+# Setting objective function
+f.obj <- c(8, 6, 3,2,4,9)
+
+# Defining constraints
+f.con <- matrix(c(1, 1,1,0,0,0,
+                  0,0,0,1,1,1,
+                  1,0,0, 1,0,0,
+                  0,1,0,0,1,0,
+                  0,0,1,0,0,1), nrow = 5, byrow = TRUE)
+
+# Set unequality signs
+f.dir <- c("<=",
+           "<=",
+           ">=",
+           ">=",
+           ">=")
+
+# Set right hand side coefficients
+f.rhs <- c(70,
+           40,
+           40,
+           35,
+           25)
+
+
+# Final value of objective function
+lp("min", f.obj, f.con, f.dir, f.rhs)
+
+# Final value of optimal parameters
+lp("min", f.obj, f.con, f.dir, f.rhs)$solution
+
+```

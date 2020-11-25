@@ -6,7 +6,7 @@ data<-read.csv("UniversalBank.csv")
 #Structure of Data
 str(data)
 summary(data) #Summary of data
-
+install.packages("MLmetrics")
 # converting data into factors
 data$Education<-factor(data$Education)
 data$Personal.Loan<-factor(data$Personal.Loan)
@@ -60,7 +60,7 @@ library(ggplot2)
 pred.class <- predict(fit1, newdata = train.df)
 confusionMatrix(pred.class, train.df$Personal.Loan, positive="1")
 F1_Score(y_true=train.df$Personal.Loan, y_pred=pred.class, positive = "1") # F1 SCore calculation
-
+?F1_Score
 # validation
 pred.class1 <- predict(fit1, newdata = valid.df)
 confusionMatrix(pred.class1, valid.df$Personal.Loan, positive="1")

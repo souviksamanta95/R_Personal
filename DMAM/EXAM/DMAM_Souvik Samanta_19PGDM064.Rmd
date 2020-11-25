@@ -1,0 +1,69 @@
+---
+title: "Mid Term Exam"
+author: "Souvik Samanta"
+date: "12/11/2020"
+output: word_document
+---
+
+```{r}
+# Clearing environment
+rm(list=ls())
+
+# Setting Working Directory
+setwd("C:/Users/souvi/Desktop/DMAM")
+
+# Importing Dataset
+data <- read.csv("Question1 end term.csv")
+
+#Structure of Data
+str(data)
+#Removing TIME column
+data$time <- NULL
+#Converting factor variables
+data$anaemia <- factor(data$anaemia)
+data$diabetes <- factor(data$diabetes)
+data$high_blood_pressure <- factor(data$high_blood_pressure)
+data$sex <- factor(data$sex)
+data$smoking <- factor(data$smoking)
+data$DEATH_EVENT <- factor(data$DEATH_EVENT)
+str(data)
+head(data)
+summary(data)
+
+# Creating Training and validation dataset
+set.seed(1)
+train.index <- sample(c(1:dim(data)[1]), dim(data)[1]*0.8)
+# Dataset is not that huge and for getting maximum training data, taking train-test split of 80:20
+valid.index <- setdiff(c(1:dim(data)[1]), train.index)
+train.df <- data[train.index, ]
+valid.df <- data[valid.index, ]
+
+dim(train.df)
+t<- table(train.df$DEATH_EVENT); t
+
+dim(valid.df)
+v<-table(valid.df$DEATH_EVENT); v
+
+############################################
+# ADABOOST
+############################################
+library(ada)
+library(caret)
+cvcontrol <- trainControl(method="repeatedcv", number = 10,repeats = 10)
+train.ada <- train(DEATH_EVENT ~ ., data=train.df, method="ada",trControl=cvcontrol)
+
+#computing confusion matrix for training data
+pred.train2 <- predict(train.ada,train.df,type = "raw")
+confusionMatrix(pred.train2, as.factor(train.df$DEATH_EVENT),positive="1")
+# We got an accuracy of 84.9%
+# we got sensitivity of 68%
+
+#computing confusion matrix for validation data
+pred.valid2 <- predict(train.ada,valid.df,type = "raw")
+confusionMatrix(pred.valid2, as.factor(valid.df$DEATH_EVENT),positive="1")
+# We got an accuracy of 75%
+# we got sensitivity of 42.9%
+
+
+```
+
